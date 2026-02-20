@@ -35,13 +35,21 @@ eck-kibana:
 
 eck-logstash:
   enabled: true
-
-  # Pour avoir un nom de Service stable côté Filebeat
   fullnameOverride: "logstash-ls-beats"
 
   elasticsearchRefs:
     - clusterName: eck
       name: elasticsearch
+
+  volumeClaimTemplates:
+    - metadata:
+        name: logstash-data   # IMPORTANT: doit s'appeler exactement comme ça
+      spec:
+        storageClassName: local-path
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 30Gi
 
   # Port beats
   services:
