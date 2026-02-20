@@ -1,0 +1,148 @@
+# values-elk-k8s.yaml
+
+eck-elasticsearch:
+  # 1 noeud pour démarrer. Passe à 3 si tu as 3 workers (recommandé).
+  nodeSets:
+    - name: default
+      count: 1
+      config:
+        node.store.allow_mmap: false
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              resources:
+                requests:
+                  memory: 2Gi
+                limits:
+                  memory: 2Gi
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            storageClassName: local-path
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 30Gi
+
+eck-kibana:
+  enabled: true
+  spec:
+    count: 1
+    elasticsearchRef:
+      name: elasticsearch
+
+eck-logstash:
+  enabled: true
+
+  # Pour avoir un nom de Service stable côté Filebeat
+  fullnameOverride: "logstash-ls-beats"
+
+  elasticsearchRefs:
+    - clusterName: eck
+      name: elasticsearch
+
+  # Port beats
+  services:
+    - name: beats
+      service:
+        spec:
+          type: ClusterIP
+          ports:
+            - name: filebeat
+              port: 5044
+              protocol: TCP
+              targetPort: 5044
+
+  pipelines:
+    - pipeline.id: main
+      config.string: |
+        input {
+          beats { port => 5044 }
+        }
+
+        # Au début : on ne parse rien, on forward juste.
+        # Tu pourras ajouter grok/json plus tard si besoin.
+        output {
+          elasticsearch {
+            hosts => [ "${ECK_ES_HOSTS}" ]
+            user => "${ECK_ES_USER}"
+            password => "${ECK_ES_PASSWORD}"
+            ssl_certificate_authorities => "${ECK_ES_SSL_CERTIFICATE_AUTHORITY}"
+          }
+        }
+
+eck-beats:
+  enabled: true
+
+  type: filebeat
+
+  # On choisit un DaemonSet pour avoir 1 Filebeat par node (collecte /var/log/containers)
+  daemonSet:
+    podTemplate:
+      spec:
+        serviceAccountName: filebeat
+        automountServiceAccountToken: true
+        securityContext:
+          runAsUser: 0
+        containers:
+          - name: filebeat
+            # data dir pour l’état Filebeat
+            volumeMounts:
+              - name: varlogcontainers
+                mountPath: /var/log/containers
+                readOnly: true
+              - name: varlogpods
+                mountPath: /var/log/pods
+                readOnly: true
+              - name: filebeat-data
+                mountPath: /usr/share/filebeat/data
+        volumes:
+          - name: varlogcontainers
+            hostPath:
+              path: /var/log/containers
+          - name: varlogpods
+            hostPath:
+              path: /var/log/pods
+          - name: filebeat-data
+            hostPath:
+              path: /var/lib/filebeat-data
+              type: DirectoryOrCreate
+
+  # RBAC minimal pour add_kubernetes_metadata
+  serviceAccount:
+    name: filebeat
+  clusterRole:
+    name: filebeat
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "namespaces", "nodes"]
+        verbs: ["get", "list", "watch"]
+  clusterRoleBinding:
+    name: filebeat
+    subjects:
+      - kind: ServiceAccount
+        name: filebeat
+        namespace: elastic-stack
+    roleRef:
+      kind: ClusterRole
+      name: filebeat
+      apiGroup: rbac.authorization.k8s.io
+
+  # Config Filebeat : collecte logs containerd via /var/log/containers/*.log
+  config:
+    filebeat.inputs:
+      - type: filestream
+        id: k8s-containers
+        paths:
+          - /var/log/containers/*.log
+        prospector.scanner.symlinks: true
+        parsers:
+          - container: ~
+
+    processors:
+      - add_kubernetes_metadata: {}
+
+    output.logstash:
+      hosts: ["logstash-ls-beats-ls-beats:5044"]
