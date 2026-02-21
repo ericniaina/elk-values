@@ -180,6 +180,8 @@ eck-beats:
                   kubernetes.namespace: "local"
               - equals:
                   kubernetes.namespace: "local-path-storage"
+              - equals:
+                  kubernetes.namespace: "kube-system"
 
     output.logstash:
       hosts: ["logstash-ls-beats-ls-beats:5044"]
