@@ -1,0 +1,133 @@
+<div class="table-container mat-elevation-z2">
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-item status-valid">
+      <mat-icon class="legend-icon">check_circle</mat-icon>Validé
+    </span>
+    <span class="legend-item status-pending">
+      <mat-icon class="legend-icon">schedule</mat-icon>En attente
+    </span>
+    <span class="legend-item status-invalid">
+      <mat-icon class="legend-icon">cancel</mat-icon>Invalide
+    </span>
+    <span class="legend-hint">
+      <mat-icon class="legend-icon hint-icon">info_outline</mat-icon>
+      Survolez un indicateur pour les détails
+    </span>
+  </div>
+
+  <mat-divider />
+
+  <table mat-table [dataSource]="data()" class="validation-table">
+
+    <!-- ID -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="mono-id">{{ row.id }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Projet -->
+    <ng-container matColumnDef="projet">
+      <th mat-header-cell *matHeaderCellDef>Projet</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="project-name">{{ row.projet }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Responsable -->
+    <ng-container matColumnDef="responsable">
+      <th mat-header-cell *matHeaderCellDef>Responsable</th>
+      <td mat-cell *matCellDef="let row">{{ row.responsable }}</td>
+    </ng-container>
+
+    <!-- Validation circuit -->
+    <ng-container matColumnDef="validation">
+      <th mat-header-cell *matHeaderCellDef>Circuit de validation</th>
+      <td mat-cell *matCellDef="let row">
+        <div class="validation-circuit">
+
+          <!-- EDM step -->
+          <div class="step-wrapper">
+            <div
+              class="step-node {{ getStatusClass(row.edm.status) }}"
+              [matTooltip]="tooltipText(row.edm)"
+              matTooltipClass="meta-tooltip"
+              [matTooltipDisabled]="!tooltipText(row.edm)"
+              matTooltipPosition="above"
+            >
+              <mat-icon>{{ getStatusIcon(row.edm.status) }}</mat-icon>
+            </div>
+            <span class="step-label">EDM</span>
+          </div>
+
+          <!-- Connector -->
+          <div class="connector {{ getConnectorClass(row.edm.status) }}"></div>
+
+          <!-- IT step -->
+          <div class="step-wrapper">
+            <div
+              class="step-node {{ getStatusClass(row.it.status) }}"
+              [matTooltip]="tooltipText(row.it)"
+              matTooltipClass="meta-tooltip"
+              [matTooltipDisabled]="!tooltipText(row.it)"
+              matTooltipPosition="above"
+            >
+              <mat-icon>{{ getStatusIcon(row.it.status) }}</mat-icon>
+            </div>
+            <span class="step-label">IT</span>
+          </div>
+
+        </div>
+      </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let row">
+
+        @if (!hasActions(row)) {
+          <span class="no-action">—</span>
+        }
+
+        <div class="action-group">
+
+          @if (row.edm.status === 'en attente') {
+            <div class="action-row">
+              <button mat-stroked-button class="btn-validate"
+                (click)="act(row, 'edm', 'validé')">
+                <mat-icon>check</mat-icon> EDM
+              </button>
+              <button mat-stroked-button class="btn-reject"
+                (click)="act(row, 'edm', 'invalide')">
+                <mat-icon>close</mat-icon> EDM
+              </button>
+            </div>
+          }
+
+          @if (row.it.status === 'en attente') {
+            <div class="action-row">
+              <button mat-stroked-button class="btn-validate"
+                (click)="act(row, 'it', 'validé')">
+                <mat-icon>check</mat-icon> IT
+              </button>
+              <button mat-stroked-button class="btn-reject"
+                (click)="act(row, 'it', 'invalide')">
+                <mat-icon>close</mat-icon> IT
+              </button>
+            </div>
+          }
+
+        </div>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+  </table>
+</div>

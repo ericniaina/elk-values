@@ -1,0 +1,263 @@
+// ── Variables ────────────────────────────────────────────────────────────────
+$valid-color:   #065f46;
+$valid-bg:      #d1fae5;
+$valid-border:  #6ee7b7;
+$valid-icon:    #10b981;
+
+$pending-color: #78350f;
+$pending-bg:    #fef3c7;
+$pending-border:#fcd34d;
+$pending-icon:  #f59e0b;
+
+$invalid-color: #7f1d1d;
+$invalid-bg:    #fee2e2;
+$invalid-border:#fca5a5;
+$invalid-icon:  #ef4444;
+
+// ── Container ────────────────────────────────────────────────────────────────
+.table-container {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+// ── Legend ───────────────────────────────────────────────────────────────────
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  background: #f8fafc;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+
+  &.status-valid   { background: $valid-bg;   color: $valid-color;   border: 1px solid $valid-border; }
+  &.status-pending { background: $pending-bg; color: $pending-color; border: 1px solid $pending-border; }
+  &.status-invalid { background: $invalid-bg; color: $invalid-color; border: 1px solid $invalid-border; }
+}
+
+.legend-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  line-height: 1 !important;
+}
+
+.legend-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-left: auto;
+
+  .hint-icon {
+    color: #cbd5e1;
+  }
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+.validation-table {
+  width: 100%;
+}
+
+.mat-mdc-header-cell {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase;
+  color: #94a3b8 !important;
+  background: #f8fafc;
+}
+
+.mat-mdc-cell {
+  padding: 14px 16px !important;
+  vertical-align: middle;
+}
+
+.table-row {
+  &:nth-child(even) {
+    background: #fafbfc;
+  }
+  &:hover {
+    background: #f0f9ff;
+  }
+  transition: background 0.15s;
+}
+
+.mono-id {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.project-name {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+// ── Validation circuit ───────────────────────────────────────────────────────
+.validation-circuit {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 4px 0;
+}
+
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.step-node {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  cursor: default;
+  transition: box-shadow 0.2s;
+
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    line-height: 1 !important;
+  }
+
+  &:hover {
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+  }
+
+  &.status-valid {
+    background: $valid-bg;
+    border-color: $valid-border;
+    color: $valid-icon;
+    &:hover { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+  }
+
+  &.status-pending {
+    background: $pending-bg;
+    border-color: $pending-border;
+    color: $pending-icon;
+    &:hover { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); }
+  }
+
+  &.status-invalid {
+    background: $invalid-bg;
+    border-color: $invalid-border;
+    color: $invalid-icon;
+    &:hover { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); }
+  }
+}
+
+.step-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: #9ca3af;
+}
+
+.connector {
+  width: 24px;
+  height: 2px;
+  margin: 17px 2px 0;
+  border-radius: 2px;
+  transition: background 0.3s;
+
+  &.connector-active {
+    background: linear-gradient(90deg, #6ee7b7, #86efac);
+  }
+
+  &.connector-inactive {
+    background: #e5e7eb;
+  }
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+.no-action {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-row {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-validate {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  padding: 0 10px !important;
+  color: $valid-color !important;
+  border-color: $valid-border !important;
+
+  mat-icon {
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin-right: 2px;
+  }
+
+  &:hover {
+    background: $valid-bg !important;
+  }
+}
+
+.btn-reject {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  padding: 0 10px !important;
+  color: $invalid-color !important;
+  border-color: $invalid-border !important;
+
+  mat-icon {
+    font-size: 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin-right: 2px;
+  }
+
+  &:hover {
+    background: $invalid-bg !important;
+  }
+}
+
+// ── Tooltip ──────────────────────────────────────────────────────────────────
+::ng-deep .meta-tooltip {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  font-size: 12px !important;
+  line-height: 1.8 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  white-space: pre-line !important;
+}
